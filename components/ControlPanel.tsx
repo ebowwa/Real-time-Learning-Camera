@@ -1,5 +1,5 @@
 import React from 'react';
-import type { LearnedItem } from '../types';
+import type { LearnedItem, FeatureWeights } from '../types';
 import { CameraIcon, StopIcon, LightbulbIcon, TrashIcon, Spinner } from './icons';
 
 interface ControlPanelProps {
@@ -11,8 +11,8 @@ interface ControlPanelProps {
   isLearning: boolean;
   learnedItems: LearnedItem[];
   onDeleteItem: (id: string) => void;
-  colorWeight: number;
-  onColorWeightChange: (weight: number) => void;
+  featureWeights: FeatureWeights;
+  onFeatureWeightsChange: (weights: FeatureWeights) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -24,9 +24,18 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   isLearning,
   learnedItems,
   onDeleteItem,
-  colorWeight,
-  onColorWeightChange
+  featureWeights,
+  onFeatureWeightsChange
 }) => {
+  const handleWeightChange = (feature: string, value: number) => {
+    onFeatureWeightsChange({
+      ...featureWeights,
+      [feature]: value,
+    });
+  };
+
+  const totalWeight = Object.values(featureWeights).reduce((sum, w) => sum + w, 0);
+
   return (
     <div className="w-full h-full bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-2xl p-6 flex flex-col shadow-2xl">
       <h2 className="text-2xl font-bold text-cyan-300 mb-4">Gemini Vision AI</h2>
@@ -78,24 +87,40 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       
       {/* Classifier Settings */}
       <div className="mt-6 pt-6 border-t border-gray-700">
-        <h3 className="text-lg font-semibold mb-3 text-gray-200">Classifier Settings</h3>
-        <label htmlFor="weight-slider" className="text-sm text-gray-400">Analysis Balance</label>
-        <div className="flex items-center gap-3 mt-2">
-            <span className="text-xs text-cyan-400">Color</span>
-            <input
-                id="weight-slider"
-                type="range"
-                min="0"
-                max="1"
-                step="0.05"
-                value={colorWeight}
-                onChange={(e) => onColorWeightChange(parseFloat(e.target.value))}
-                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-            />
-            <span className="text-xs text-fuchsia-400">Shape</span>
-        </div>
-        <div className="text-center text-sm mt-2 text-gray-300">
-            {Math.round(colorWeight * 100)}% / {Math.round((1 - colorWeight) * 100)}%
+        <h3 className="text-lg font-semibold mb-3 text-gray-200">Feature Weights</h3>
+        <div className="space-y-4">
+            <div>
+                <div className="flex justify-between items-center mb-1">
+                    <label htmlFor="color-weight-slider" className="text-sm text-cyan-400">Color</label>
+                    <span className="text-sm font-mono text-gray-300">{ totalWeight > 0 ? Math.round((featureWeights.color / totalWeight) * 100) : 0 }%</span>
+                </div>
+                <input
+                    id="color-weight-slider"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={featureWeights.color}
+                    onChange={(e) => handleWeightChange('color', parseInt(e.target.value, 10))}
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                />
+            </div>
+            <div>
+                <div className="flex justify-between items-center mb-1">
+                    <label htmlFor="shape-weight-slider" className="text-sm text-fuchsia-400">Shape</label>
+                    <span className="text-sm font-mono text-gray-300">{ totalWeight > 0 ? Math.round((featureWeights.shape / totalWeight) * 100) : 0 }%</span>
+                </div>
+                <input
+                    id="shape-weight-slider"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={featureWeights.shape}
+                    onChange={(e) => handleWeightChange('shape', parseInt(e.target.value, 10))}
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                />
+            </div>
         </div>
       </div>
       

@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import CameraFeed from './components/CameraFeed';
 import type { CameraFeedHandle } from './components/CameraFeed';
 import ControlPanel from './components/ControlPanel';
-import type { LearnedItem, ClassificationResult } from './types';
+import type { LearnedItem, ClassificationResult, FeatureWeights } from './types';
 import { MotionDetector } from './utils/motionDetector';
 import { LocalClassifier } from './utils/localClassifier';
 
@@ -17,7 +17,7 @@ function App() {
   const [currentClassification, setCurrentClassification] = useState<ClassificationResult>(null);
   const [isLearning, setIsLearning] = useState(false);
   const [isClassifying, setIsClassifying] = useState(false);
-  const [colorWeight, setColorWeight] = useState(0.5); // Default to a 50/50 balance
+  const [featureWeights, setFeatureWeights] = useState<FeatureWeights>({ color: 50, shape: 50 });
 
   const cameraFeedRef = useRef<CameraFeedHandle>(null);
   const motionCheckIntervalRef = useRef<number | null>(null);
@@ -84,7 +84,7 @@ function App() {
             histogram: item.histogram, 
             hogDescriptor: item.hogDescriptor
         };
-        const score = classifierRef.current.compareFeatures(currentFeatures, itemFeatures, colorWeight);
+        const score = classifierRef.current.compareFeatures(currentFeatures, itemFeatures, featureWeights);
         if (score > bestScore) {
           bestScore = score;
           bestMatch = item;
@@ -103,7 +103,7 @@ function App() {
     } finally {
       setIsClassifying(false);
     }
-  }, [learnedItems, colorWeight]);
+  }, [learnedItems, featureWeights]);
 
   const processFrame = useCallback(async () => {
     if (isProcessingFrameRef.current || isClassifying || !cameraFeedRef.current) return;
@@ -163,8 +163,8 @@ function App() {
           isLearning={isLearning}
           learnedItems={learnedItems}
           onDeleteItem={handleDeleteItem}
-          colorWeight={colorWeight}
-          onColorWeightChange={setColorWeight}
+          featureWeights={featureWeights}
+          onFeatureWeightsChange={setFeatureWeights}
         />
       </aside>
     </div>

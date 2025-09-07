@@ -11,3 +11,8 @@ export interface LearnedItem {
 
 /** The label of the classified object, or null if no match. */
 export type ClassificationResult = string | null;
+
+/** An object to hold the weight for each classification feature. */
+export type FeatureWeights = {
+  [key: string]: number;
+};

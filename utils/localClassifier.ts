@@ -1,3 +1,5 @@
+import type { FeatureWeights } from '../types';
+
 // --- CONFIGURATION ---
 // The number of bins for each color channel (R, G, B). Total bins = BINS^3.
 const COLOR_BINS = 8;
@@ -135,18 +137,22 @@ export class LocalClassifier {
   }
 
   /**
-   * Compares two feature sets (color and HOG) using a weighted intersection method.
+   * Compares two feature sets using a weighted, normalized intersection method.
    * @param f1 Features of the first item.
    * @param f2 Features of the second item.
-   * @param colorWeight The weight (0-1) to give to the color histogram similarity.
+   * @param weights An object containing the weight for each feature (e.g., { color: 50, shape: 50 }).
    * @returns A combined similarity score between 0 and 1.
    */
   public compareFeatures(
     f1: { histogram: number[], hogDescriptor: number[] }, 
     f2: { histogram: number[], hogDescriptor: number[] },
-    colorWeight: number
+    weights: FeatureWeights
   ): number {
-    const hogWeight = 1 - colorWeight;
+    const totalWeight = (weights.color || 0) + (weights.shape || 0);
+    if (totalWeight === 0) return 0;
+
+    const colorWeight = (weights.color || 0) / totalWeight;
+    const hogWeight = (weights.shape || 0) / totalWeight;
     
     let colorIntersection = 0;
     for (let i = 0; i < f1.histogram.length; i++) {

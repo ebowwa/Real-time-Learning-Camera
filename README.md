@@ -7,7 +7,7 @@ This application is a smart, real-time visual classifier that runs entirely in y
 -   **On-Device AI:** All processing happens directly in your browser. No camera data is ever sent to a server, ensuring 100% privacy.
 -   **Interactive Learning:** Teach the classifier by showing it an object and giving it a name.
 -   **Real-time Classification:** Uses a sophisticated fingerprinting method analyzing both color and shape to instantly identify learned objects.
--   **Tunable Classifier:** Adjust the balance between color and shape analysis to optimize recognition for different objects.
+-   **Tunable Classifier:** A scalable control panel allows you to adjust the weight of each classification feature (e.g., Color, Shape) independently.
 -   **CPU-Efficient:** A smart motion detection algorithm ensures classification only runs when needed, saving battery and processing power.
 -   **Zero Dependencies:** No need for API keys or server-side components. It just works.
 
@@ -32,7 +32,7 @@ This project uses a combination of efficient on-device motion detection and a mu
 3.  **Recognition via Comparison:**
     -   When motion is detected, the app generates a new two-part fingerprint for the current camera view in real-time.
     -   It then compares this new fingerprint to the saved fingerprints of all the objects it has learned.
-    -   It calculates a weighted similarity score based on both color and shape matches. The weighting can be adjusted in the "Classifier Settings" panel to prioritize one feature over the other.
+    -   It calculates a weighted similarity score based on both color and shape matches. The weighting is controlled by the "Feature Weights" sliders. The system automatically normalizes these weights, so you can intuitively adjust the influence of each feature on the final decision.
     -   If the combined score is high enough, the app concludes it has found the object and displays its name.
 
 This dual-analysis approach provides a fast, private, and surprisingly robust method for real-time object recognition directly on a user's device.
@@ -45,6 +45,6 @@ This dual-analysis approach provides a fast, private, and surprisingly robust me
 2.  **Teach an Object:** Point your camera at an object you want the classifier to learn.
 3.  **Give it a Name:** Type a name for the object in the input field (e.g., "Coffee Mug").
 4.  **Learn:** Click the "Learn Object" button. The app will capture a frame and save the object's unique fingerprint to its memory.
-5.  **Fine-Tune (Optional):** Use the "Analysis Balance" slider in the "Classifier Settings" section to adjust whether the AI should focus more on the object's `Color` or its `Shape`. For objects with unique shapes but common colors, slide it towards `Shape`. For objects with distinct colors, slide it towards `Color`.
+5.  **Fine-Tune (Optional):** Use the sliders in the "Feature Weights" section to adjust the importance of each feature. For an object with a unique shape but common color, increase the "Shape" weight. For an object with a distinct color, increase the "Color" weight. The percentages show the real-time influence of each feature.
 6.  **Recognize:** The classifier will now attempt to recognize the object whenever it's in the camera's view and there is motion.
 7.  **Expand its Brain:** Teach it more objects! It will do its best to distinguish between them in real-time. You can view and manage all learned items in the "Memory" list.
