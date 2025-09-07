@@ -64,9 +64,11 @@ The current modular architecture is designed to be extensible. Here is a roadmap
 -   **What it is:** A **Color Coherence Vector (CCV)**. This feature measures how "clumped together" different colors are within an object.
 -   **Why it's useful:** It would allow the classifier to distinguish between a blue-and-white striped shirt (where colors are highly coherent) and a blue-and-white confetti pattern (where colors are scattered and incoherent), even if both have the exact same overall color profile.
 
-### 3. Holistic Shape: Invariance to Rotation & Scale
--   **What it is:** **Hu Moments**. A set of seven unique numbers mathematically derived from an object's silhouette.
--   **Why it's useful:** These seven numbers are magically invariant to an object's position, size, and rotation. This would allow the classifier to learn a key held upright and still recognize it perfectly when it's lying on its side, upside down, or further away from the camera.
+### 3. Holistic & Robust Shape Analysis
+-   **A. Hu Moments:** A set of seven unique numbers mathematically derived from an object's silhouette.
+    -   **Why it's useful:** These seven numbers are magically invariant to an object's position, size, and rotation. This would allow the classifier to learn a key held upright and still recognize it perfectly when it's lying on its side, upside down, or further away from the camera.
+-   **B. Keypoint Descriptors (e.g., ORB):** A more advanced technique that finds dozens of "interesting" unique points (keypoints) on an object, like corners or distinct patterns. It then creates a small digital descriptor for each keypoint. Classification is done by matching keypoints between the live view and the learned object.
+    -   **Why it's useful:** This method is incredibly robust against changes in **rotation**, **scale**, and even **occlusion** (when part of the object is hidden).
 
 ### 4. Texture Analysis: Capturing the "Feel" of a Surface
 -   **What it is:** **Local Binary Patterns (LBP)**. A powerful and efficient texture descriptor that creates a fingerprint of a surface by analyzing the local patterns of pixels.

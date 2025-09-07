@@ -1,5 +1,5 @@
 {
-  "name": "Gemini Vision: Real-time Learning Camera",
+  "name": "Real-time Learning Camera",
   "description": "An intelligent camera application that uses the Gemini API to learn and classify objects in real-time. Show an object to the camera, give it a name, and watch as it learns to recognize it instantly.",
   "requestFramePermissions": [
     "camera"
