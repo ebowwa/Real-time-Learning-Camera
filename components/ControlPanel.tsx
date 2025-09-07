@@ -8,6 +8,7 @@ interface ControlPanelProps {
   newLabel: string;
   onLabelChange: (label: string) => void;
   onLearn: () => void;
+  isLearning: boolean;
   learnedItems: LearnedItem[];
   onDeleteItem: (id: string) => void;
 }
@@ -18,12 +19,13 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   newLabel,
   onLabelChange,
   onLearn,
+  isLearning,
   learnedItems,
   onDeleteItem
 }) => {
   return (
     <div className="w-full h-full bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-2xl p-6 flex flex-col shadow-2xl">
-      <h2 className="text-2xl font-bold text-cyan-300 mb-4">Local Vision AI</h2>
+      <h2 className="text-2xl font-bold text-cyan-300 mb-4">Gemini Vision AI</h2>
 
       {/* Camera Control */}
       <button
@@ -52,11 +54,20 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           />
           <button
             onClick={onLearn}
-            disabled={!isCameraOn || !newLabel}
+            disabled={!isCameraOn || !newLabel || isLearning}
             className="w-full flex items-center justify-center px-4 py-3 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition-colors duration-200 disabled:bg-gray-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500"
           >
-            <LightbulbIcon className="w-5 h-5 mr-2" />
-            <span>Learn Object</span>
+            {isLearning ? (
+              <>
+                <Spinner className="w-5 h-5 mr-2" />
+                <span>Learning...</span>
+              </>
+            ) : (
+              <>
+                <LightbulbIcon className="w-5 h-5 mr-2" />
+                <span>Learn Object</span>
+              </>
+            )}
           </button>
         </div>
       </div>
