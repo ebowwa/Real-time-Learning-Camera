@@ -138,14 +138,15 @@ export class LocalClassifier {
    * Compares two feature sets (color and HOG) using a weighted intersection method.
    * @param f1 Features of the first item.
    * @param f2 Features of the second item.
+   * @param colorWeight The weight (0-1) to give to the color histogram similarity.
    * @returns A combined similarity score between 0 and 1.
    */
   public compareFeatures(
     f1: { histogram: number[], hogDescriptor: number[] }, 
-    f2: { histogram: number[], hogDescriptor: number[] }
+    f2: { histogram: number[], hogDescriptor: number[] },
+    colorWeight: number
   ): number {
-    const COLOR_WEIGHT = 0.5;
-    const HOG_WEIGHT = 0.5;
+    const hogWeight = 1 - colorWeight;
     
     let colorIntersection = 0;
     for (let i = 0; i < f1.histogram.length; i++) {
@@ -157,6 +158,6 @@ export class LocalClassifier {
         hogIntersection += Math.min(f1.hogDescriptor[i], f2.hogDescriptor[i]);
     }
     
-    return (colorIntersection * COLOR_WEIGHT) + (hogIntersection * HOG_WEIGHT);
+    return (colorIntersection * colorWeight) + (hogIntersection * hogWeight);
   }
 }

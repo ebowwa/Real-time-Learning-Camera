@@ -17,6 +17,7 @@ function App() {
   const [currentClassification, setCurrentClassification] = useState<ClassificationResult>(null);
   const [isLearning, setIsLearning] = useState(false);
   const [isClassifying, setIsClassifying] = useState(false);
+  const [colorWeight, setColorWeight] = useState(0.5); // Default to a 50/50 balance
 
   const cameraFeedRef = useRef<CameraFeedHandle>(null);
   const motionCheckIntervalRef = useRef<number | null>(null);
@@ -83,7 +84,7 @@ function App() {
             histogram: item.histogram, 
             hogDescriptor: item.hogDescriptor
         };
-        const score = classifierRef.current.compareFeatures(currentFeatures, itemFeatures);
+        const score = classifierRef.current.compareFeatures(currentFeatures, itemFeatures, colorWeight);
         if (score > bestScore) {
           bestScore = score;
           bestMatch = item;
@@ -102,7 +103,7 @@ function App() {
     } finally {
       setIsClassifying(false);
     }
-  }, [learnedItems]);
+  }, [learnedItems, colorWeight]);
 
   const processFrame = useCallback(async () => {
     if (isProcessingFrameRef.current || isClassifying || !cameraFeedRef.current) return;
@@ -162,6 +163,8 @@ function App() {
           isLearning={isLearning}
           learnedItems={learnedItems}
           onDeleteItem={handleDeleteItem}
+          colorWeight={colorWeight}
+          onColorWeightChange={setColorWeight}
         />
       </aside>
     </div>

@@ -11,6 +11,8 @@ interface ControlPanelProps {
   isLearning: boolean;
   learnedItems: LearnedItem[];
   onDeleteItem: (id: string) => void;
+  colorWeight: number;
+  onColorWeightChange: (weight: number) => void;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
@@ -21,7 +23,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   onLearn,
   isLearning,
   learnedItems,
-  onDeleteItem
+  onDeleteItem,
+  colorWeight,
+  onColorWeightChange
 }) => {
   return (
     <div className="w-full h-full bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-2xl p-6 flex flex-col shadow-2xl">
@@ -69,6 +73,29 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
               </>
             )}
           </button>
+        </div>
+      </div>
+      
+      {/* Classifier Settings */}
+      <div className="mt-6 pt-6 border-t border-gray-700">
+        <h3 className="text-lg font-semibold mb-3 text-gray-200">Classifier Settings</h3>
+        <label htmlFor="weight-slider" className="text-sm text-gray-400">Analysis Balance</label>
+        <div className="flex items-center gap-3 mt-2">
+            <span className="text-xs text-cyan-400">Color</span>
+            <input
+                id="weight-slider"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={colorWeight}
+                onChange={(e) => onColorWeightChange(parseFloat(e.target.value))}
+                className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+            />
+            <span className="text-xs text-fuchsia-400">Shape</span>
+        </div>
+        <div className="text-center text-sm mt-2 text-gray-300">
+            {Math.round(colorWeight * 100)}% / {Math.round((1 - colorWeight) * 100)}%
         </div>
       </div>
       
