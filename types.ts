@@ -1,12 +1,15 @@
+/** A key-value object where the key is the feature name (e.g., "color") and the value is its feature vector. */
+export type FeatureSet = {
+  [featureName: string]: number[];
+};
+
 export interface LearnedItem {
   id: string;
   label: string;
   /** A thumbnail for display purposes */
   thumbnailBase64: string;
-  /** A color histogram used as a feature vector for classification. */
-  histogram: number[];
-  /** A Histogram of Oriented Gradients (HOG) for texture and shape analysis. */
-  hogDescriptor: number[];
+  /** A collection of feature vectors that form the object's fingerprint. */
+  features: FeatureSet;
 }
 
 /** The label of the classified object, or null if no match. */

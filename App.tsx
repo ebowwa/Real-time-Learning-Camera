@@ -2,9 +2,11 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import CameraFeed from './components/CameraFeed';
 import type { CameraFeedHandle } from './components/CameraFeed';
 import ControlPanel from './components/ControlPanel';
-import type { LearnedItem, ClassificationResult, FeatureWeights } from './types';
+import type { LearnedItem, ClassificationResult, FeatureWeights, FeatureSet } from './types';
 import { MotionDetector } from './utils/motionDetector';
 import { LocalClassifier } from './utils/localClassifier';
+import { generateColorHistogram } from './utils/features/colorHistogram';
+import { generateHOGDescriptor } from './utils/features/hogDescriptor';
 
 // --- CONFIGURATION ---
 const MOTION_CHECK_INTERVAL = 500; // Check for motion more frequently for better responsiveness.
@@ -40,14 +42,18 @@ function App() {
     
     const imageBase64 = cameraFeedRef.current?.captureFrame();
     if (imageBase64) {
-      const histogram = await classifierRef.current.generateHistogram(imageBase64);
-      const hogDescriptor = await classifierRef.current.generateHOGDescriptor(imageBase64);
+      // Generate all features for the new object.
+      const colorFeature = await generateColorHistogram(imageBase64);
+      const shapeFeature = await generateHOGDescriptor(imageBase64);
+      
       const newItem: LearnedItem = {
         id: crypto.randomUUID(),
         label: newLabel.trim(),
         thumbnailBase64: imageBase64,
-        histogram: histogram,
-        hogDescriptor: hogDescriptor,
+        features: {
+          color: colorFeature,
+          shape: shapeFeature,
+        },
       };
       setLearnedItems(prev => [...prev, newItem]);
       setNewLabel('');
@@ -68,23 +74,19 @@ function App() {
     }
     setIsClassifying(true);
     try {
-      const currentHistogram = await classifierRef.current.generateHistogram(frame);
-      const currentHogDescriptor = await classifierRef.current.generateHOGDescriptor(frame);
+      // Generate features for the current camera frame.
+      const currentColorFeature = await generateColorHistogram(frame);
+      const currentShapeFeature = await generateHOGDescriptor(frame);
+      const currentFeatures: FeatureSet = {
+        color: currentColorFeature,
+        shape: currentShapeFeature,
+      };
 
       let bestMatch: LearnedItem | null = null;
       let bestScore = 0;
-      
-      const currentFeatures = { 
-        histogram: currentHistogram, 
-        hogDescriptor: currentHogDescriptor 
-      };
 
       for (const item of learnedItems) {
-        const itemFeatures = { 
-            histogram: item.histogram, 
-            hogDescriptor: item.hogDescriptor
-        };
-        const score = classifierRef.current.compareFeatures(currentFeatures, itemFeatures, featureWeights);
+        const score = classifierRef.current.compareFeatures(currentFeatures, item.features, featureWeights);
         if (score > bestScore) {
           bestScore = score;
           bestMatch = item;

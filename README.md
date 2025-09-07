@@ -9,13 +9,14 @@ This application is a smart, real-time visual classifier that runs entirely in y
 -   **Real-time Classification:** Uses a sophisticated fingerprinting method analyzing both color and shape to instantly identify learned objects.
 -   **Tunable Classifier:** A scalable control panel allows you to adjust the weight of each classification feature (e.g., Color, Shape) independently.
 -   **CPU-Efficient:** A smart motion detection algorithm ensures classification only runs when needed, saving battery and processing power.
+-   **Modular & Extensible:** The architecture is designed with a "composer" pattern, allowing new visual features to be plugged in easily.
 -   **Zero Dependencies:** No need for API keys or server-side components. It just works.
 
 ---
 
 ## 🚀 How It Works: The Tech Behind the Magic
 
-This project uses a combination of efficient on-device motion detection and a multi-faceted computer vision technique for robust object recognition.
+This project uses a modular architecture combining efficient motion detection with a multi-faceted computer vision technique for robust object recognition.
 
 1.  **Motion Detection (The Gatekeeper):**
     -   To avoid constantly running expensive calculations, the app first checks for motion.
@@ -23,19 +24,19 @@ This project uses a combination of efficient on-device motion detection and a mu
     -   By comparing the pixel data of the current frame to the previous one, it can quickly determine if significant motion has occurred.
     -   The more intensive classification step is only triggered when motion is detected.
 
-2.  **Learning with Fingerprinting Features:**
-    -   When you "learn" an object, the app analyzes the captured image to create a sophisticated "fingerprint" composed of multiple feature vectors:
-        -   **Color Histogram:** This captures the overall color distribution of the object, creating a profile of its colors.
-        -   **Histogram of Oriented Gradients (HOG):** This analyzes the object's texture and shape in a more sophisticated way. Instead of just looking at edge strength, it analyzes the *direction* of edges (e.g., horizontal, vertical, diagonal). This creates a much more detailed and robust fingerprint of the object's structure.
+2.  **Learning with Fingerprinting Features (A Modular Approach):**
+    -   When you "learn" an object, the app orchestrates several modular, single-responsibility **feature extractors** to create a sophisticated "fingerprint" (`FeatureSet`). Each extractor specializes in one aspect of visual analysis:
+        -   **Color Feature (`colorHistogram.ts`):** This captures the overall color distribution of the object, creating a profile of its colors via a histogram.
+        -   **Shape Feature (`hogDescriptor.ts`):** This analyzes the object's texture and shape using a **Histogram of Oriented Gradients (HOG)**. It measures the *direction* of edges (e.g., horizontal, vertical, diagonal) to create a robust fingerprint of the object's structure.
     -   This combined fingerprint, along with the label you provide, is stored locally in the browser.
 
-3.  **Recognition via Comparison:**
-    -   When motion is detected, the app generates a new two-part fingerprint for the current camera view in real-time.
-    -   It then compares this new fingerprint to the saved fingerprints of all the objects it has learned.
-    -   It calculates a weighted similarity score based on both color and shape matches. The weighting is controlled by the "Feature Weights" sliders. The system automatically normalizes these weights, so you can intuitively adjust the influence of each feature on the final decision.
+3.  **Recognition via Comparison (`localClassifier.ts`):**
+    -   When motion is detected, the app generates a new fingerprint for the current camera view in real-time by calling the same feature extractors.
+    -   It then uses a generic **comparator** module to compare the new fingerprint to the saved fingerprints of all learned objects.
+    -   This comparator calculates a weighted similarity score based on the "Feature Weights" sliders. It dynamically normalizes these weights, allowing you to intuitively adjust the influence of each feature on the final decision.
     -   If the combined score is high enough, the app concludes it has found the object and displays its name.
 
-This dual-analysis approach provides a fast, private, and surprisingly robust method for real-time object recognition directly on a user's device.
+This modular, "composer" architecture provides a fast, private, and robust method for real-time object recognition that can be easily extended with new features in the future.
 
 ---
 
