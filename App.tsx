@@ -1,16 +1,14 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
 import CameraFeed from './components/CameraFeed';
 import type { CameraFeedHandle } from './components/CameraFeed';
 import ControlPanel from './components/ControlPanel';
 import type { LearnedItem, ClassificationResult } from './types';
 import { MotionDetector } from './utils/motionDetector';
+import { LocalClassifier } from './utils/localClassifier';
 
 // --- CONFIGURATION ---
-const MOTION_CHECK_INTERVAL = 1000; // Check for motion every second to avoid excessive API calls
-
-// --- GEMINI SETUP ---
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const MOTION_CHECK_INTERVAL = 500; // Check for motion more frequently for better responsiveness.
+const CLASSIFICATION_THRESHOLD = 0.60; // Similarity threshold for a match. Adjusted for new feature vector.
 
 function App() {
   const [isCameraOn, setIsCameraOn] = useState(false);
@@ -21,10 +19,10 @@ function App() {
   const [isClassifying, setIsClassifying] = useState(false);
 
   const cameraFeedRef = useRef<CameraFeedHandle>(null);
-  // FIX: Use `number` for setInterval return type in browser environments instead of `NodeJS.Timeout`.
   const motionCheckIntervalRef = useRef<number | null>(null);
   const motionDetectorRef = useRef(new MotionDetector());
   const isProcessingFrameRef = useRef(false);
+  const classifierRef = useRef(new LocalClassifier());
 
   const handleToggleCamera = () => {
     const turningOff = isCameraOn;
@@ -41,10 +39,14 @@ function App() {
     
     const imageBase64 = cameraFeedRef.current?.captureFrame();
     if (imageBase64) {
+      const histogram = await classifierRef.current.generateHistogram(imageBase64);
+      const hogDescriptor = await classifierRef.current.generateHOGDescriptor(imageBase64);
       const newItem: LearnedItem = {
         id: crypto.randomUUID(),
         label: newLabel.trim(),
         thumbnailBase64: imageBase64,
+        histogram: histogram,
+        hogDescriptor: hogDescriptor,
       };
       setLearnedItems(prev => [...prev, newItem]);
       setNewLabel('');
@@ -65,27 +67,31 @@ function App() {
     }
     setIsClassifying(true);
     try {
-      const labels = learnedItems.map(item => item.label);
-      const prompt = `Analyze the image. From the following list of items, which is the most prominent one in the image? List: [${labels.join(', ')}]. If none of the items are in the image, respond with "None". Respond with only the name of the item or "None".`;
+      const currentHistogram = await classifierRef.current.generateHistogram(frame);
+      const currentHogDescriptor = await classifierRef.current.generateHOGDescriptor(frame);
+
+      let bestMatch: LearnedItem | null = null;
+      let bestScore = 0;
       
-      const imagePart = {
-        inlineData: {
-          mimeType: 'image/jpeg',
-          data: frame.split(',')[1],
-        },
+      const currentFeatures = { 
+        histogram: currentHistogram, 
+        hogDescriptor: currentHogDescriptor 
       };
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: { parts: [imagePart, {text: prompt}] },
-      });
+      for (const item of learnedItems) {
+        const itemFeatures = { 
+            histogram: item.histogram, 
+            hogDescriptor: item.hogDescriptor
+        };
+        const score = classifierRef.current.compareFeatures(currentFeatures, itemFeatures);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = item;
+        }
+      }
 
-      const resultText = response.text.trim();
-      
-      const matchedLabel = labels.find(l => l.toLowerCase() === resultText.toLowerCase());
-
-      if (matchedLabel) {
-        setCurrentClassification(matchedLabel);
+      if (bestMatch && bestScore > CLASSIFICATION_THRESHOLD) {
+        setCurrentClassification(bestMatch.label);
       } else {
         setCurrentClassification(null);
       }
@@ -107,18 +113,22 @@ function App() {
       const hasMotion = await motionDetectorRef.current.checkForMotion(frame);
       if (hasMotion) {
           runClassification(frame);
+      } else {
+        if (currentClassification !== null) {
+            setTimeout(() => setCurrentClassification(null), 500);
+        }
       }
     }
     isProcessingFrameRef.current = false;
-  }, [runClassification, isClassifying]);
+  }, [runClassification, isClassifying, currentClassification]);
 
 
   useEffect(() => {
     if (isCameraOn) {
-      motionCheckIntervalRef.current = setInterval(processFrame, MOTION_CHECK_INTERVAL);
+      motionCheckIntervalRef.current = window.setInterval(processFrame, MOTION_CHECK_INTERVAL);
     } else {
       if (motionCheckIntervalRef.current) {
-        clearInterval(motionCheckIntervalRef.current);
+        window.clearInterval(motionCheckIntervalRef.current);
       }
       setCurrentClassification(null);
       motionDetectorRef.current.reset();
@@ -126,7 +136,7 @@ function App() {
 
     return () => {
       if (motionCheckIntervalRef.current) {
-        clearInterval(motionCheckIntervalRef.current);
+        window.clearInterval(motionCheckIntervalRef.current);
       }
     };
   }, [isCameraOn, processFrame]);

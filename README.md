@@ -1,45 +1,47 @@
-# Gemini Vision AI: A Real-Time, On-Device Learning Camera
+# Real-Time, On-Device Learning Camera
 
-This application is a smart, real-time visual classifier that runs in your web browser. It turns your device's camera into an intelligent system that you can teach to recognize new objects on the fly by leveraging the power of Google's Gemini API.
+This application is a smart, real-time visual classifier that runs entirely in your web browser. It turns your device's camera into an intelligent system that you can teach to recognize new objects on the fly, with no server-side processing or external API calls required.
 
 ## ✨ Key Features
 
--   **Gemini-Powered Vision:** Utilizes Google's advanced multimodal AI for highly accurate object recognition.
--   **Interactive Learning:** Teach the AI what to look for by simply showing it an object and giving it a name.
--   **Real-time Feedback:** Get instant visual feedback as the AI identifies objects in the camera feed.
--   **CPU-Efficient:** A smart motion detection algorithm ensures that the powerful Gemini API is only called when there are changes in the camera feed, saving cost and processing power.
--   **Privacy Note:** For classification, camera frames are sent to Google's servers for analysis. Captured thumbnails for learned items are stored locally in your browser.
+-   **On-Device AI:** All processing happens directly in your browser. No camera data is ever sent to a server, ensuring 100% privacy.
+-   **Interactive Learning:** Teach the classifier by showing it an object and giving it a name.
+-   **Real-time Classification:** Uses a sophisticated fingerprinting method analyzing both color and shape to instantly identify learned objects.
+-   **CPU-Efficient:** A smart motion detection algorithm ensures classification only runs when needed, saving battery and processing power.
+-   **Zero Dependencies:** No need for API keys or server-side components. It just works.
 
 ---
 
 ## 🚀 How It Works: The Tech Behind the Magic
 
-This project leverages the powerful Google Gemini API to provide real-time object recognition. It combines efficient on-device motion detection with a state-of-the-art, cloud-based vision model.
+This project uses a combination of efficient on-device motion detection and a multi-faceted computer vision technique for robust object recognition.
 
 1.  **Motion Detection (The Gatekeeper):**
-    -   To avoid constantly running expensive API calls, the app first checks for motion.
+    -   To avoid constantly running expensive calculations, the app first checks for motion.
     -   It captures a tiny (32x32 pixel), grayscale version of the camera feed every few moments.
     -   By comparing the pixel data of the current frame to the previous one, it can quickly determine if significant motion has occurred.
     -   The more intensive classification step is only triggered when motion is detected.
 
-2.  **Learning as Context-Setting:**
-    -   When you teach the AI an object, you are providing it with a label to look for. The app maintains a list of these "learned" object names.
-    -   This list is used to give the AI context, focusing its analysis on only the items you care about. A thumbnail is captured and stored locally in your browser to represent the learned item.
+2.  **Learning via Advanced Fingerprinting:**
+    -   When you "learn" an object, the app analyzes the captured image to create a sophisticated "fingerprint" composed of two parts:
+        -   **Color Histogram:** This captures the overall color distribution of the object, creating a profile of its colors.
+        -   **Histogram of Oriented Gradients (HOG):** This analyzes the object's texture and shape in a more sophisticated way. Instead of just looking at edge strength, it analyzes the *direction* of edges (e.g., horizontal, vertical, diagonal). This creates a much more detailed and robust fingerprint of the object's structure.
+    -   This combined fingerprint, along with the label you provide, is stored locally in the browser.
 
-3.  **Recognition via Gemini Vision:**
-    -   When motion is detected, the app sends the current camera frame to the Gemini model along with the list of learned object names.
-    -   It asks the model, "Which of these objects is in the image?"
-    -   Gemini's powerful vision capabilities allow it to accurately identify objects, far surpassing the capabilities of simple on-device techniques.
+3.  **Recognition via Comparison:**
+    -   When motion is detected, the app generates a new two-part fingerprint for the current camera view in real-time.
+    -   It then compares this new fingerprint to the saved fingerprints of all the objects it has learned.
+    -   It calculates a weighted similarity score based on both color and shape matches. If the combined score is high enough, the app concludes it has found the object and displays its name.
 
-This hybrid approach provides the best of both worlds: the low-cost, high-speed efficiency of a simple motion-detection algorithm, combined with a powerful and accurate cloud-based AI model.
+This dual-analysis approach provides a fast, private, and surprisingly robust method for real-time object recognition directly on a user's device.
 
 ---
 
 ## 🕹️ How to Use
 
 1.  **Start the Camera:** Click the "Start Camera" button. You may need to grant your browser permission to access the camera.
-2.  **Teach an Object:** Point your camera at an object you want the AI to learn.
+2.  **Teach an Object:** Point your camera at an object you want the classifier to learn.
 3.  **Give it a Name:** Type a name for the object in the input field (e.g., "Coffee Mug").
-4.  **Learn:** Click the "Learn Object" button. The app will capture a frame and save the object to its memory.
-5.  **Recognize:** The AI will now attempt to recognize the object whenever it's in the camera's view and there is motion.
+4.  **Learn:** Click the "Learn Object" button. The app will capture a frame and save the object's unique fingerprint to its memory.
+5.  **Recognize:** The classifier will now attempt to recognize the object whenever it's in the camera's view and there is motion.
 6.  **Expand its Brain:** Teach it more objects! It will do its best to distinguish between them in real-time. You can view and manage all learned items in the "Memory" list.
