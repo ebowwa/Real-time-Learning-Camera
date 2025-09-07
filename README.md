@@ -48,3 +48,23 @@ This dual-analysis approach provides a fast, private, and surprisingly robust me
 5.  **Fine-Tune (Optional):** Use the sliders in the "Feature Weights" section to adjust the importance of each feature. For an object with a unique shape but common color, increase the "Shape" weight. For an object with a distinct color, increase the "Color" weight. The percentages show the real-time influence of each feature.
 6.  **Recognize:** The classifier will now attempt to recognize the object whenever it's in the camera's view and there is motion.
 7.  **Expand its Brain:** Teach it more objects! It will do its best to distinguish between them in real-time. You can view and manage all learned items in the "Memory" list.
+
+---
+
+## 🧠 Future Enhancements
+
+The current architecture is designed to be extensible. Here are some potential new "fingerprinting features" that could be added to make the classifier even more powerful:
+
+### A. Texture Analysis: Local Binary Patterns (LBP)
+-   **What it is:** LBP is a very powerful and efficient texture descriptor. It works by looking at the immediate neighborhood of each pixel and creating a "binary code" based on whether the neighbors are brighter or darker than the central pixel. A histogram of these codes creates a robust fingerprint of the object's surface texture.
+-   **Why it's useful:** This would allow the classifier to distinguish between objects that have similar colors and shapes but different surface patterns. For example:
+    -   An orange vs. a similarly colored tennis ball.
+    -   A wooden block vs. a block of brushed metal.
+    -   A book cover with text vs. a plain colored notebook.
+
+### B. Keypoint Descriptors for Robustness (e.g., ORB)
+-   **What it is:** This is a more advanced technique used in professional computer vision. Instead of analyzing the whole image, it finds a few dozen "interesting" or unique points (keypoints), like corners or distinct patterns. It then creates a small digital descriptor for the area around each keypoint. Classification is done by matching the keypoints between the live view and the learned object.
+-   **Why it's useful:** This method is incredibly robust against changes in:
+    -   **Rotation:** It doesn't matter if you hold the object upside down.
+    -   **Scale:** It can recognize the object whether it's close to the camera or far away.
+    -   **Occlusion:** It can still recognize the object even if part of it is covered.
