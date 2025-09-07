@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { LearnedItem } from '../types';
 import { CameraIcon, StopIcon, LightbulbIcon, TrashIcon, Spinner } from './icons';
@@ -9,8 +8,6 @@ interface ControlPanelProps {
   newLabel: string;
   onLabelChange: (label: string) => void;
   onLearn: () => void;
-  isLearning: boolean;
-  isClassifying: boolean;
   learnedItems: LearnedItem[];
   onDeleteItem: (id: string) => void;
 }
@@ -21,14 +18,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   newLabel,
   onLabelChange,
   onLearn,
-  isLearning,
-  isClassifying,
   learnedItems,
   onDeleteItem
 }) => {
   return (
     <div className="w-full h-full bg-gray-800/50 backdrop-blur-md border border-gray-700/50 rounded-2xl p-6 flex flex-col shadow-2xl">
-      <h2 className="text-2xl font-bold text-cyan-300 mb-4">Gemini Vision AI</h2>
+      <h2 className="text-2xl font-bold text-cyan-300 mb-4">Local Vision AI</h2>
 
       {/* Camera Control */}
       <button
@@ -57,15 +52,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           />
           <button
             onClick={onLearn}
-            disabled={!isCameraOn || !newLabel || isLearning}
+            disabled={!isCameraOn || !newLabel}
             className="w-full flex items-center justify-center px-4 py-3 bg-cyan-600 text-white rounded-lg font-semibold hover:bg-cyan-700 transition-colors duration-200 disabled:bg-gray-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500"
           >
-            {isLearning ? (
-              <Spinner className="w-5 h-5 mr-2" />
-            ) : (
-              <LightbulbIcon className="w-5 h-5 mr-2" />
-            )}
-            <span>{isLearning ? 'Learning...' : 'Learn Object'}</span>
+            <LightbulbIcon className="w-5 h-5 mr-2" />
+            <span>Learn Object</span>
           </button>
         </div>
       </div>
@@ -74,12 +65,6 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
       <div className="mt-6 pt-6 border-t border-gray-700 flex-grow overflow-y-auto">
         <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-semibold text-gray-200">Memory</h3>
-            {isClassifying && (
-                <div className="flex items-center text-sm text-cyan-400">
-                    <Spinner className="w-4 h-4 mr-2" />
-                    <span>Classifying...</span>
-                </div>
-            )}
         </div>
         {learnedItems.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
@@ -90,7 +75,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             {learnedItems.map(item => (
               <li key={item.id} className="bg-gray-900/80 rounded-lg p-3 flex items-center justify-between transition-all hover:bg-gray-700/50">
                 <div className="flex items-center gap-3">
-                  <img src={item.imageBase64} alt={item.label} className="w-12 h-12 rounded-md object-cover border-2 border-gray-600" />
+                  <img src={item.thumbnailBase64} alt={item.label} className="w-12 h-12 rounded-md object-cover border-2 border-gray-600" />
                   <span className="font-medium text-gray-300">{item.label}</span>
                 </div>
                 <button 

@@ -1,11 +1,10 @@
-
 import React, { useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
-// FIX: Import CameraIcon to resolve reference error.
 import { CameraIcon } from './icons';
+import type { ClassificationResult } from '../types';
 
 interface CameraFeedProps {
   isCameraOn: boolean;
-  classification: string;
+  classification: ClassificationResult;
 }
 
 export interface CameraFeedHandle {
@@ -70,7 +69,7 @@ const CameraFeed = forwardRef<CameraFeedHandle, CameraFeedProps>(({ isCameraOn, 
     }
   }));
 
-  const showClassification = classification && classification !== '...';
+  const showClassification = !!classification;
 
   return (
     <div className="relative w-full h-full flex items-center justify-center bg-black rounded-2xl overflow-hidden shadow-2xl">
@@ -85,7 +84,7 @@ const CameraFeed = forwardRef<CameraFeedHandle, CameraFeedProps>(({ isCameraOn, 
       )}
       
       <div className={`absolute top-4 left-1/2 -translate-x-1/2 transition-all duration-300 ease-out ${showClassification ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
-        <div className="bg-black/50 backdrop-blur-md text-white font-bold text-2xl px-6 py-3 rounded-full shadow-lg border border-white/20">
+        <div className="bg-black/50 backdrop-blur-md text-white text-2xl px-6 py-3 rounded-full shadow-lg border border-white/20 font-bold">
           {classification}
         </div>
       </div>
