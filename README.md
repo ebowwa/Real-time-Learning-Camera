@@ -52,20 +52,29 @@ This modular, "composer" architecture provides a fast, private, and robust metho
 
 ---
 
-## 🧠 Future Enhancements
+## 🧠 A Roadmap for a Smarter Classifier
 
-The current architecture is designed to be extensible. Here are some potential new "fingerprinting features" that could be added to make the classifier even more powerful:
+The current modular architecture is designed to be extensible. Here is a roadmap of potential new "fingerprinting features" that could be added to give the classifier new "senses" and make it even more powerful.
 
-### A. Texture Analysis: Local Binary Patterns (LBP)
--   **What it is:** LBP is a very powerful and efficient texture descriptor. It works by looking at the immediate neighborhood of each pixel and creating a "binary code" based on whether the neighbors are brighter or darker than the central pixel. A histogram of these codes creates a robust fingerprint of the object's surface texture.
--   **Why it's useful:** This would allow the classifier to distinguish between objects that have similar colors and shapes but different surface patterns. For example:
+### 1. Spatial Features: Adding the "Where"
+-   **What it is:** A **Spatial Grid** feature. Instead of one global histogram for an entire object, we can divide the image into a 2x2 or 3x3 grid and compute a feature (like color or HOG) for *each cell*. These are then combined into one long feature vector.
+-   **Why it's useful:** This adds crucial spatial awareness. The classifier could learn not just that an object is "red and blue," but that the "top is red" and the "bottom is blue," allowing it to easily distinguish logos, flags, and other objects with distinct patterns.
+
+### 2. Advanced Color: Understanding "Clumpiness"
+-   **What it is:** A **Color Coherence Vector (CCV)**. This feature measures how "clumped together" different colors are within an object.
+-   **Why it's useful:** It would allow the classifier to distinguish between a blue-and-white striped shirt (where colors are highly coherent) and a blue-and-white confetti pattern (where colors are scattered and incoherent), even if both have the exact same overall color profile.
+
+### 3. Holistic Shape: Invariance to Rotation & Scale
+-   **What it is:** **Hu Moments**. A set of seven unique numbers mathematically derived from an object's silhouette.
+-   **Why it's useful:** These seven numbers are magically invariant to an object's position, size, and rotation. This would allow the classifier to learn a key held upright and still recognize it perfectly when it's lying on its side, upside down, or further away from the camera.
+
+### 4. Texture Analysis: Capturing the "Feel" of a Surface
+-   **What it is:** **Local Binary Patterns (LBP)**. A powerful and efficient texture descriptor that creates a fingerprint of a surface by analyzing the local patterns of pixels.
+-   **Why it's useful:** This unlocks a new dimension of analysis, allowing the classifier to distinguish between objects that have similar colors and shapes but different surface patterns. For example:
     -   An orange vs. a similarly colored tennis ball.
     -   A wooden block vs. a block of brushed metal.
     -   A book cover with text vs. a plain colored notebook.
 
-### B. Keypoint Descriptors for Robustness (e.g., ORB)
--   **What it is:** This is a more advanced technique used in professional computer vision. Instead of analyzing the whole image, it finds a few dozen "interesting" or unique points (keypoints), like corners or distinct patterns. It then creates a small digital descriptor for the area around each keypoint. Classification is done by matching the keypoints between the live view and the learned object.
--   **Why it's useful:** This method is incredibly robust against changes in:
-    -   **Rotation:** It doesn't matter if you hold the object upside down.
-    -   **Scale:** It can recognize the object whether it's close to the camera or far away.
-    -   **Occlusion:** It can still recognize the object even if part of it is covered.
+### 5. The Deep Learning Frontier: On-Device Model Embeddings
+-   **What it is:** Using a pre-trained, lightweight Convolutional Neural Network (CNN) like **MobileNetV3** (via a library like `TensorFlow.js`) to generate a single, powerful feature vector—an "embedding."
+-   **Why it's useful:** This is the state-of-the-art. This single feature vector is incredibly rich and robust, encoding a high-level, semantic understanding of the object that includes complex concepts of shape, texture, and patterns simultaneously. It is far more resilient to changes in lighting, camera angle, and orientation than any hand-crafted feature.
